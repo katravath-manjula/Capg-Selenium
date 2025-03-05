@@ -1,63 +1,65 @@
-﻿using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium;
-using SeleniumExtras.WaitHelpers;
-using System;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TestProject1
+public static class SeleniumHelper
 {
-     public class SeleniumHelper
+    public static void Click(IWebElement element)
     {
-        private readonly IWebDriver driver;
-        private readonly WebDriverWait _wait;
+        element.Click();
+    }
 
-        public SeleniumHelper(IWebDriver driver, int timeoutInSeconds = 10)
-        {
-            this.driver = driver;
-            _wait = new WebDriverWait(driver, TimeSpan.FromSeconds(timeoutInSeconds));
-        }
+    public static void Submit(IWebElement element)
+    {
+        element.Submit();
+    }
 
+    public static void EnterText(IWebElement element, string text)
+    {
+        element.Clear();
+        element.SendKeys(text);
+    }
 
-        public void NavigateUrl(string url)
-        {
-            driver.Navigate().GoToUrl(url);
-        }
-        // Method to click an element after waiting
-        public void ClickElement(By locator)
-        {
-            _wait.Until(ExpectedConditions.ElementToBeClickable(locator)).Click();
-        }
+    public static void SelectDropDownByText(IWebElement element, string text)
+    {
+        new SelectElement(element).SelectByText(text);
+    }
 
-        // Method to enter text into an input field
-        public void EnterText(By locator, string text)
-        {
-            var element = _wait.Until(ExpectedConditions.ElementIsVisible(locator));
-            element.Clear();
-            element.SendKeys(text);
-        }
+    public static void SelectDropDownByValue(IWebElement element, string value)
+    {
+        new SelectElement(element).SelectByValue(value);
+    }
 
-        // Method to wait for an element to be present
-        public void WaitForElement(By locator)
+    public static void MultiSelectElements(IWebElement element, string[] values)
+    {
+        SelectElement multiSelect = new SelectElement(element);
+        foreach (var value in values)
         {
-            _wait.Until(ExpectedConditions.ElementExists(locator));
-        }
-
-        // Method to check if an element is displayed
-        public bool IsElementDisplayed(By locator)
-        {
-            try
-            {
-                return driver.FindElement(locator).Displayed;
-            }
-            catch (NoSuchElementException)
-            {
-                return false;
-            }
+            multiSelect.SelectByValue(value);
         }
     }
 
-}
+    public static List<string> GetAllSelectedLists(IWebElement element)
+    {
+        List<string> options = new List<string>();
+        foreach (var option in new SelectElement(element).AllSelectedOptions)
+        {
+            options.Add(option.Text);
+        }
+        return options;
+    }
 
+    public static List<string> GetAllCheckedCheckboxes(IWebDriver driver, By locator)
+    {
+        List<string> selectedValues = new List<string>();
+        var checkboxes = driver.FindElements(locator);
+        foreach (var checkbox in checkboxes)
+        {
+            if (checkbox.Selected)
+            {
+                selectedValues.Add(checkbox.GetAttribute("value"));
+            }
+        }
+        return selectedValues;
+    }
+}
